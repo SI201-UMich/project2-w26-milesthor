@@ -1,7 +1,7 @@
 # SI 201 HW4 (Library Checkout System)
-# Your name:
-# Your student id:
-# Your email:
+# Your name: Miles Thornton
+# Your student id: 4762 4083
+# Your email: milethor@umich.edu
 # Who or what you worked with on this homework (including generative AI like ChatGPT):
 # If you worked with generative AI also add a statement for how you used it.
 # e.g.:
@@ -41,7 +41,45 @@ def load_listing_results(html_path) -> list[tuple]:
     # ==============================
     # YOUR CODE STARTS HERE
     # ==============================
-    pass
+    with open(html_path, "r", encoding= "utf-8-sig") as file:
+
+        results = []
+
+        seen = []
+
+        content = file.read()
+        soup = BeautifulSoup(content, "html.parser")
+
+        listing_tags = soup.find_all("a", href=re.compile(r"/rooms(?:/plus)?/\d+"))
+
+        for tag in listing_tags:
+
+            href = tag.get("href")
+
+            matched_code = re.search(r"/rooms(?:/plus)?/(\d+)",href)
+
+            if not matched_code:
+
+                continue
+
+            listing_id = matched_code.group(1)
+
+            if listing_id in seen:
+                continue
+            seen.append(listing_id)
+
+            container = tag.parent.parent.parent.parent
+            title_div = container.find("div", class_=re.compile(r"t1jojoys"))
+            
+            if title_div:
+                listing_title = title_div.get_text(strip=True)
+            else:
+                listing_title = ""
+
+            results.append((listing_title,listing_id))
+        
+        return results
+
     # ==============================
     # YOUR CODE ENDS HERE
     # ==============================
@@ -194,8 +232,12 @@ class TestCases(unittest.TestCase):
 
     def test_load_listing_results(self):
         # TODO: Check that the number of listings extracted is 18.
+
+        self.assertEqual(len(self.listings), 18)
+
         # TODO: Check that the FIRST (title, id) tuple is  ("Loft in Mission District", "1944564").
-        pass
+        
+        self.assertEqual(self.listings[0], ("Loft in Mission District", "1944564"))
 
     def test_get_listing_details(self):
         html_list = ["467507", "1550913", "1944564", "4614763", "6092596"]
