@@ -108,7 +108,31 @@ def get_listing_details(listing_id) -> dict:
     # ==============================
     # YOUR CODE STARTS HERE
     # ==============================
-    pass
+    
+    base_dir = os.path.abspath(os.path.dirname(__file__))
+    file_path = os.path.join(base_dir, "html_files", f"listing_{listing_id}.html")
+
+    with open(file_path, "r", encoding="utf-8-sig") as file:
+        soup = BeautifulSoup(file.read(), "html.parser")
+    
+    policy_number = "Pending"
+
+    policy_tag = soup.find(string=re.compile(r"Policy number:", re.IGNORECASE))
+    
+    if policy_tag:
+        raw = policy_tag.parent.find_next_sibling()
+        if raw:
+            raw_text = raw.get_text(strip=True)
+            if re.search(r"pending", raw_text, re.IGNORECASE):
+                policy_number = "Pending"
+            elif re.search(r"exempt", raw_text, re.IGNORECASE):
+                policy_number = "Exempt"
+            else:
+                policy_number = raw_text
+
+
+
+
     # ==============================
     # YOUR CODE ENDS HERE
     # ==============================
