@@ -203,7 +203,32 @@ def create_listing_database(html_path) -> list[tuple]:
     # ==============================
     # YOUR CODE STARTS HERE
     # ==============================
-    pass
+    
+    listings = load_listing_results(html_path)
+
+    results = []
+
+    for listing_title, listing_id in listings:
+
+        details = get_listing_details(listing_id)
+
+        inner = details[listing_id]
+
+        result_tuple = (
+
+            listing_title,
+            listing_id,
+            inner["policy_number"],
+            inner["host_type"],
+            inner["host_name"],
+            inner["room_type"],
+            inner["location_rating"]
+        )
+
+        results.append(result_tuple)
+    
+    return results
+
     # ==============================
     # YOUR CODE ENDS HERE
     # ==============================
@@ -249,7 +274,11 @@ def avg_location_rating_by_room_type(data) -> dict:
     # ==============================
     # YOUR CODE STARTS HERE
     # ==============================
-    pass
+    
+
+
+
+
     # ==============================
     # YOUR CODE ENDS HERE
     # ==============================
