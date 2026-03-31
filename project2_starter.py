@@ -251,7 +251,29 @@ def output_csv(data, filename) -> None:
     # ==============================
     # YOUR CODE STARTS HERE
     # ==============================
-    pass
+    
+    sorted_data = sorted(data, key=lambda x: x[6], reverse=True)
+
+    with open(filename, "w", newline="", encoding="utf-8-sig") as file:
+
+        writer = csv.writer(file)
+
+        writer.writerow([
+
+            "Listing Title",
+            "Listing ID",
+            "Policy Number",
+            "Host Type",
+            "Host Name",
+            "Room Type",
+            "Location Rating"
+
+        ])
+
+        for row in sorted_data:
+
+            writer.writerow(row)
+
     # ==============================
     # YOUR CODE ENDS HERE
     # ==============================
@@ -375,8 +397,18 @@ class TestCases(unittest.TestCase):
         out_path = os.path.join(self.base_dir, "test.csv")
 
         # TODO: Call output_csv() to write the detailed_data to a CSV file.
+        output_csv(self.detailed_data, out_path)
+
         # TODO: Read the CSV back in and store rows in a list.
+        rows = []
+        with open(out_path, "r", encoding="utf-8-sig") as file:
+            reader = csv.reader(file)
+            for row in reader:
+                rows.append(row)
+
         # TODO: Check that the first data row matches ["Guesthouse in San Francisco", "49591060", "STR-0000253", "Superhost", "Ingrid", "Entire Room", "5.0"].
+        self.assertEqual(rows[1], ["Guesthouse in San Francisco", "49591060", "STR-0000253", "Superhost", "Ingrid", "Entire Room", "5.0"])
+
 
         os.remove(out_path)
 
