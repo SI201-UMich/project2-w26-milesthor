@@ -138,7 +138,7 @@ def get_listing_details(listing_id) -> dict:
     if superhost_tag:
         host_type = "Superhost"
     else:
-        host_type = "Regular"
+        host_type = "regular"
     
     #Host name and room type
     host_name = ""
@@ -295,11 +295,31 @@ def avg_location_rating_by_room_type(data) -> dict:
     # TODO: Implement checkout logic following the instructions
     # ==============================
     # YOUR CODE STARTS HERE
-    # ==============================
+    # ==============================   
     
+    totals = {}
+    counts = {}
 
+    for row in data:
 
+        room_type = row[5]
+        location_rating = row[6]
 
+        if location_rating == 0.0:
+            continue
+        if room_type not in totals:
+
+            totals[room_type] = 0
+            counts[room_type] = 0
+        
+        totals[room_type] += location_rating
+        counts[room_type] += 1
+    
+    averages = {}
+    for room_type in totals:
+        averages[room_type] = round(totals[room_type] / counts[room_type], 2)
+
+    return averages
 
     # ==============================
     # YOUR CODE ENDS HERE
@@ -321,7 +341,27 @@ def validate_policy_numbers(data) -> list[str]:
     # ==============================
     # YOUR CODE STARTS HERE
     # ==============================
-    pass
+    
+    pattern1 = r"^20\d{2}-00\d{4}STR$"
+    pattern2 = r"^STR-000\d{4}$"
+
+    invalid_listings = []
+    for row in data:
+        listing_id = row[1]
+        policy_number = row[2]
+
+        if policy_number == "Pending" or policy_number == "Exempt":
+
+            continue
+
+        match1 = re.search(pattern1, policy_number)
+        match2 = re.search(pattern2, policy_number)
+
+        if not match1 and not match2:
+            invalid_listings.append(listing_id)
+        
+    return invalid_listings
+
     # ==============================
     # YOUR CODE ENDS HERE
     # ==============================
@@ -390,8 +430,11 @@ class TestCases(unittest.TestCase):
         # TODO: Check that each tuple in detailed_data has exactly 7 elements:
         # (listing_title, listing_id, policy_number, host_type, host_name, room_type, location_rating)
 
+        for row in self.detailed_data:
+            self.assertEqual(len(row), 7)
+            
         # TODO: Spot-check the LAST tuple is ("Guest suite in Mission District", "467507", "STR-0005349", "Superhost", "Jennifer", "Entire Room", 4.8).
-        pass
+        self.assertEqual(self.detailed_data[-1], ("Guest suite in Mission District", "467507", "STR-0005349", "Superhost", "Jennifer", "Entire Room", 4.8))
 
     def test_output_csv(self):
         out_path = os.path.join(self.base_dir, "test.csv")
@@ -409,18 +452,25 @@ class TestCases(unittest.TestCase):
         # TODO: Check that the first data row matches ["Guesthouse in San Francisco", "49591060", "STR-0000253", "Superhost", "Ingrid", "Entire Room", "5.0"].
         self.assertEqual(rows[1], ["Guesthouse in San Francisco", "49591060", "STR-0000253", "Superhost", "Ingrid", "Entire Room", "5.0"])
 
-
         os.remove(out_path)
 
     def test_avg_location_rating_by_room_type(self):
         # TODO: Call avg_location_rating_by_room_type() and save the output.
+
+        averages = avg_location_rating_by_room_type(self.detailed_data)
+
         # TODO: Check that the average for "Private Room" is 4.9.
-        pass
+
+        self.assertEqual(averages["Private Room"], 4.9)
 
     def test_validate_policy_numbers(self):
         # TODO: Call validate_policy_numbers() on detailed_data and save the result into a variable invalid_listings.
+
+        invalid_listings = validate_policy_numbers(self.detailed_data)
+
         # TODO: Check that the list contains exactly "16204265" for this dataset.
-        pass
+        
+        self.assertEqual(invalid_listings, ["16204265"])
 
 
 def main():
